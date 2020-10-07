@@ -58,12 +58,12 @@ def main(stdscr):
 
         overview_window.addstr('Issues\n')
         for issue in issues.values():
-            overview_window.addstr(issue.title + ' - ' + str(issue.comment_count) + '\n')
+            overview_window.addstr(str(issue.comment_count) + ' - ' + issue.title + '\n')
         overview_window.addstr('\n')
 
         overview_window.addstr('PRs\n')
         for pr in prs.values():
-            overview_window.addstr(pr.title + ' - ' + str(pr.comment_count) + '\n')
+            overview_window.addstr(str(pr.comment_count) + ' - ' + pr.title + '\n')
 
         overview_window.refresh()
 

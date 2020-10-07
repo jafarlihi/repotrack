@@ -2,6 +2,7 @@ import os
 import curses
 import time
 import math
+import pickle
 from github import Github
 
 
@@ -25,9 +26,16 @@ def main(stdscr):
 
     github = Github(os.getenv('GITHUB_TOKEN'))
     repo = github.get_repo(os.getenv('REPOTRACK_REPO'))
+    
+    try:
+        issues = pickle.load(open(os.getenv('REPOTRACK_REPO').replace('/', '-') + '-issues.p', 'rb'))
+    except:
+        issues = {}
 
-    issues = {}
-    prs = {}
+    try:
+        prs = pickle.load(open(os.getenv('REPOTRACK_REPO').replace('/', '-') + '-prs.p', 'rb'))
+    except:
+        prs = {}
 
     while True:
         _issues = repo.get_issues(assignee=os.getenv('REPOTRACK_USERNAME'))
@@ -41,6 +49,7 @@ def main(stdscr):
                     log_window.refresh()
                     beep()
                 issues[issue.id] = issue
+                pickle.dump(issues, open(os.getenv('REPOTRACK_REPO').replace('/', '-') + '-issues.p', 'wb+'))
 
         _prs = repo.get_pulls()
         for pr in _prs:
@@ -53,6 +62,7 @@ def main(stdscr):
                     log_window.refresh()
                     beep()
                 prs[pr.id] = pr
+                pickle.dump(prs, open(os.getenv('REPOTRACK_REPO').replace('/', '-') + '-prs.p', 'wb+'))
 
         overview_window.erase()
 

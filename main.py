@@ -25,8 +25,13 @@ def main(stdscr):
     log_window.refresh()
 
     github = Github(os.getenv('GITHUB_TOKEN'))
-    repo = github.get_repo(os.getenv('REPOTRACK_REPO'))
-    
+    try:
+        repo = github.get_repo(os.getenv('REPOTRACK_REPO'))
+    except Exception as e:
+        curses.endwin()
+        print('Failed to open connection to GitHub, exiting. Exception: %s' % repr(e))
+        exit(1)
+
     try:
         issues = pickle.load(open(os.getenv('REPOTRACK_REPO').replace('/', '-') + '-issues.p', 'rb'))
     except:
@@ -39,7 +44,12 @@ def main(stdscr):
 
     while True:
         seen_issues = []
-        _issues = repo.get_issues(assignee=os.getenv('REPOTRACK_USERNAME'))
+        try:
+            _issues = list(repo.get_issues(assignee=os.getenv('REPOTRACK_USERNAME')))
+        except Exception as e:
+            log_window.addstr('Fetching issues failed, retrying. Exception: %s' % repr(e) + '\n')
+            log_window.refresh()
+            continue
         for issue in _issues:
             if issue.pull_request is None:
                 comment_count = issue.comments
@@ -63,7 +73,12 @@ def main(stdscr):
             pickle.dump(issues, open(os.getenv('REPOTRACK_REPO').replace('/', '-') + '-issues.p', 'wb+'))
 
         seen_prs = []
-        _prs = repo.get_pulls()
+        try:
+            _prs = list(repo.get_pulls())
+        except Exception as e:
+            log_window.addstr('Fetching PRs failed, retrying. Exception: %s' % repr(e) + '\n')
+            log_window.refresh()
+            continue
         for pr in _prs:
             if pr.assignee is not None and pr.assignee.login == os.getenv('REPOTRACK_USERNAME'):
                 comment_count = pr.comments + pr.review_comments

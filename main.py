@@ -38,6 +38,7 @@ def main(stdscr):
         prs = {}
 
     while True:
+        seen_issues = []
         _issues = repo.get_issues(assignee=os.getenv('REPOTRACK_USERNAME'))
         for issue in _issues:
             if issue.pull_request is None:
@@ -49,8 +50,19 @@ def main(stdscr):
                     log_window.refresh()
                     beep()
                 issues[issue.id] = issue
+                seen_issues.append(issue.id)
                 pickle.dump(issues, open(os.getenv('REPOTRACK_REPO').replace('/', '-') + '-issues.p', 'wb+'))
 
+        issue_keys_to_delete = []
+        for issue_key in issues.keys():
+            if issue_key not in seen_issues:
+                issue_keys_to_delete.append(issue_key)
+
+        for issue_key in issue_keys_to_delete:
+            issues.pop(issue_key, None)
+            pickle.dump(issues, open(os.getenv('REPOTRACK_REPO').replace('/', '-') + '-issues.p', 'wb+'))
+
+        seen_prs = []
         _prs = repo.get_pulls()
         for pr in _prs:
             if pr.assignee is not None and pr.assignee.login == os.getenv('REPOTRACK_USERNAME'):
@@ -62,7 +74,17 @@ def main(stdscr):
                     log_window.refresh()
                     beep()
                 prs[pr.id] = pr
+                seen_prs.append(pr.id)
                 pickle.dump(prs, open(os.getenv('REPOTRACK_REPO').replace('/', '-') + '-prs.p', 'wb+'))
+
+        pr_keys_to_delete = []
+        for pr_key in prs.keys():
+            if pr_key not in seen_prs:
+                pr_keys_to_delete.append(pr_key)
+
+        for pr_key in pr_keys_to_delete:
+            prs.pop(pr_key, None)
+            pickle.dump(prs, open(os.getenv('REPOTRACK_REPO').replace('/', '-') + '-prs.p', 'wb+'))
 
         overview_window.erase()
 

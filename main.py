@@ -53,7 +53,7 @@ def main(stdscr):
 
         _prs = repo.get_pulls()
         for pr in _prs:
-            if pr.assignee.login == os.getenv('REPOTRACK_USERNAME'):
+            if pr.assignee is not None and pr.assignee.login == os.getenv('REPOTRACK_USERNAME'):
                 comment_count = pr.comments + pr.review_comments
                 pr.comment_count = comment_count
                 if pr.id in prs and prs[pr.id].comment_count != comment_count:

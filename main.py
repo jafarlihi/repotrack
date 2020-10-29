@@ -16,13 +16,16 @@ def main(stdscr):
     curses.cbreak()
     stdscr.keypad(True)
 
-    overview_window = curses.newwin(math.floor(curses.LINES * 0.75), curses.COLS)
-    log_window = curses.newwin(math.floor(curses.LINES * 0.25),
+    overview_window = curses.newwin(math.floor(curses.LINES * 0.50), curses.COLS)
+    log_window = curses.newwin(math.floor(curses.LINES * 0.50),
                                curses.COLS,
-                               math.floor(curses.LINES * 0.75),
+                               math.floor(curses.LINES * 0.50),
                                0)
     log_window.addstr("Log:\n")
     log_window.refresh()
+
+    overview_window.scrollok(True)
+    log_window.scrollok(True)
 
     github = Github(os.getenv('GITHUB_TOKEN'))
     try:
